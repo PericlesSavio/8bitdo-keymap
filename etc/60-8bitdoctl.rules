@@ -1,0 +1,4 @@
+# Lets the logged-in user create the virtual keyboard (/dev/uinput) without
+# root, like Steam's steam-devices rules do. The controller's own evdev node
+# already gets the same access from the joystick rules in 70-uaccess.rules.
+KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess"

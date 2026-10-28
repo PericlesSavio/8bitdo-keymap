@@ -1,0 +1,5 @@
+#!/bin/sh
+# Uses the private venv when install.sh had to create one (no distro PySide6).
+PY=python3
+[ -x /usr/share/8bitdoctl/venv/bin/python ] && PY=/usr/share/8bitdoctl/venv/bin/python
+exec "$PY" /usr/share/8bitdoctl/gui-qt/main.py "$@"

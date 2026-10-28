@@ -1,0 +1,41 @@
+#!/bin/sh
+# Removes everything installed by 8bitdoctl's install.sh. Self-contained:
+# works without the project folder.
+set -e
+
+if [ "$(id -u)" = 0 ]; then
+	SUDO=""
+else
+	SUDO="sudo"
+	systemctl --user disable --now 8bitdod.service 2>/dev/null || true
+fi
+
+echo "==> Uninstalling 8bitdoctl"
+$SUDO rm -f /usr/bin/8bitdod /usr/bin/8bitdoctl /usr/bin/8bitdoctl-qt
+$SUDO rm -f /usr/lib/systemd/user/8bitdod.service
+$SUDO rm -f /usr/share/dbus-1/services/io.github.PericlesSavio.EightBitDoCtl.service
+$SUDO rm -f /usr/lib/udev/rules.d/60-8bitdoctl.rules
+$SUDO rm -f /etc/bash_completion.d/8bitdoctl
+$SUDO rm -rf /usr/share/8bitdoctl
+$SUDO rm -f /usr/share/applications/8bitdoctl-qt.desktop
+$SUDO udevadm control --reload 2>/dev/null || true
+$SUDO update-desktop-database /usr/share/applications 2>/dev/null || true
+[ -z "$SUDO" ] || systemctl --user daemon-reload 2>/dev/null || true
+
+# User data: ask when interactive, keep (with a hint) otherwise.
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/8bitdoctl"
+if [ -t 0 ] && [ -d "$CONFIG" ]; then
+	printf "Also remove your saved keyboard mappings (%s)? [y/N] " "$CONFIG"
+	read -r answer
+	case "$answer" in
+	[yY]*) rm -rf "$CONFIG" ;;
+	*) echo "Keyboard mappings kept at $CONFIG" ;;
+	esac
+elif [ -d "$CONFIG" ]; then
+	echo "Keyboard mappings kept at $CONFIG (remove with: rm -rf $CONFIG)"
+fi
+
+# Remove this very script last.
+$SUDO rm -f /usr/bin/8bitdoctl-uninstall
+
+echo "Done."

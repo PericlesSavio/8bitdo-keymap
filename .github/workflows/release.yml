@@ -1,0 +1,41 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Test
+        run: make test
+
+      - name: Build archives
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          FLAGS="-X 'github.com/PericlesSavio/8bitdoctl/internal/version.Version=$VERSION'"
+          for ARCH in amd64 arm64; do
+            DIR="dist/8bitdo-keymap"
+            rm -rf "$DIR" && mkdir -p "$DIR"
+            CGO_ENABLED=0 GOOS=linux GOARCH=$ARCH go build -ldflags "$FLAGS" -o "$DIR/8bitdod" ./cmd/8bitdod
+            CGO_ENABLED=0 GOOS=linux GOARCH=$ARCH go build -ldflags "$FLAGS" -o "$DIR/8bitdoctl" ./cmd/8bitdoctl
+            cp -r install.sh etc packaging gui-qt LICENSE README.md "$DIR"
+            tar -czf "dist/8bitdo-keymap-linux-$ARCH.tar.gz" -C dist 8bitdo-keymap
+          done
+          cd dist && sha256sum *.tar.gz > SHA256SUMS
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.tar.gz
+            dist/SHA256SUMS

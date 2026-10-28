@@ -1,0 +1,11 @@
+[Unit]
+Description=Keyboard mapping daemon for 8BitDo controllers
+
+[Service]
+Type=dbus
+BusName=io.github.PericlesSavio.EightBitDoCtl
+ExecStart=/usr/bin/8bitdod
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

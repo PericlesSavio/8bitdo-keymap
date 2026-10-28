@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=8BitDo Key Mapper
+Comment=Map 8BitDo controller buttons to keyboard keys
+Exec=8bitdoctl-qt
+Icon=input-gaming
+Terminal=false
+Categories=Utility;Qt;
